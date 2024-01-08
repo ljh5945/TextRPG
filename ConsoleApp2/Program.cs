@@ -21,12 +21,14 @@ namespace SpartaDungeon
 
             // 아이템 정보 세팅
 
-            shop.InputItem(new Item("수련자 갑옷", Item.ItemType.Armor, 0, 5, "쉽게 볼 수 있는 낡은 검입니다.", 1000));
-            shop.InputItem(new Item("무쇠갑옷", Item.ItemType.Armor, 0, 9, "보통의 검입니다.", 2000));
-            shop.InputItem(new Item("스파르타의 갑옷", Item.ItemType.Armor, 0, 15, "종이로 만들어진 갑옷입니다.", 3500));
-            shop.InputItem(new Item("낡은 검", Item.ItemType.Weapon, 2, 0, "신성한 힘이 깃든 검입니다.", 600));
-            shop.InputItem(new Item("청동 도끼", Item.ItemType.Weapon, 5, 0, "무쇠로 만들어져 튼튼한 갑옷입니다.", 900));
-            shop.InputItem(new Item("스파르타의 창", Item.ItemType.Weapon, 7, 0, "무쇠로 만들어져 튼튼한 갑옷입니다.", 1500));
+            shop.InputItem(new Item("천갑옷", Item.ItemType.Armor, 0, 3, "임시방편으로 만든 천갑옷입니다.", 700));
+            shop.InputItem(new Item("수련자 갑옷", Item.ItemType.Armor, 0, 5, "수련에 도움을 주는 갑옷입니다.", 1000));
+            shop.InputItem(new Item("무쇠갑옷", Item.ItemType.Armor, 0, 9, "무쇠로 만들어져 튼튼한 갑옷입니다.", 2000));
+            shop.InputItem(new Item("스파르타의 갑옷", Item.ItemType.Armor, 0, 15, "스파르타의 전사들이 사용했다는 전설의 갑옷입니다.", 3500));
+            shop.InputItem(new Item("낡은 검", Item.ItemType.Weapon, 2, 0, "쉽게 볼 수 있는 낡은 검 입니다.", 600));
+            shop.InputItem(new Item("청동 도끼", Item.ItemType.Weapon, 5, 0, "어디선가 사용됐던거 같은 도끼입니다.", 900));
+            shop.InputItem(new Item("스파르타의 창", Item.ItemType.Weapon, 7, 0, "스파르타의 전사들이 사용했다는 전설의 창입니다.", 1500));
+            shop.InputItem(new Item("방천화극", Item.ItemType.Weapon, 10, 0, "여포가 사용했다고 전해지는 무기입니다.", 2000));
         }
 
         static void DisplayGameIntro()
@@ -39,8 +41,9 @@ namespace SpartaDungeon
             Console.WriteLine("1. 상태보기");
             Console.WriteLine("2. 인벤토리");
             Console.WriteLine("3. 상점");
+            Console.WriteLine("4. 휴식하기");
             Console.WriteLine();
-            int input = CheckValidInput(1, 3);
+            int input = CheckValidInput(1, 4);
             switch (input)
             {
                 case 1:
@@ -52,7 +55,48 @@ namespace SpartaDungeon
                 case 3:
                     DisplayShop();
                     break;
+                case 4:
+                    TakeRest();
+                    break;
 
+            }
+        }
+
+        private static void TakeRest()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("휴식하기");
+            Console.ResetColor();
+            Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다. (보유 골드 : {player.Gold} G)");
+            Console.WriteLine();
+            Console.WriteLine("1. 휴식하기");
+            Console.WriteLine("0. 나가기");
+            int input = CheckValidInput(0, 1);
+            switch (input)
+            {
+                case 1:
+                    if (player.Gold < 500)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Gold가 부족합니다.");
+                        Console.ResetColor();
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.Write("휴식을 취합니다.");
+                        Console.ResetColor();
+                        player.Gold -= 500;
+                        player.Hp = 100;
+                        Thread.Sleep(1000);
+                    }
+                    DisplayGameIntro();
+                    break;
+                case 0:
+                    DisplayGameIntro();
+                    break;
             }
         }
 
@@ -143,8 +187,8 @@ namespace SpartaDungeon
             Console.ResetColor();
             Console.WriteLine("캐릭터의 정보를 표시합니다.");
             Console.WriteLine();
-            Console.WriteLine($"Lv.{player.Level}");
-            Console.WriteLine($"{player.Name}({player.Job})");
+            Console.WriteLine($"Lv. {player.Level.ToString("00")}");
+            Console.WriteLine($"{player.Name} ({player.Job})");
 
             sb.AppendFormat($"공격력 : {player.Atk}");
             string str = player.itemAtk > 0 ? $" (+{player.itemAtk})" : "";
@@ -230,6 +274,9 @@ namespace SpartaDungeon
         }
         static int CheckValidInput(int min, int max)
         {
+            // 아래 두 가지 상황은 비정상 -> 재입력 수행
+            // (1) 숫자가 아닌 입력을 받은 경우
+            // (2) 숫자가 최소값 ~ 최대값의 범위를 넘는 경우
             Console.WriteLine("원하시는 행동을 입력해주세요.");
             Console.Write(">>");
             while (true)
@@ -302,6 +349,16 @@ namespace SpartaDungeon
             p.inventory.InputItem(items[idx]);
             return 3;
         }
+
+        private static void PrintTextWithHighlights(string s1, string s2, string s3 = "")
+        {
+            Console.Write(s1);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write(s2);
+            Console.ResetColor();
+            Console.WriteLine(s3);
+        }
+
         public static int GetPrintableLength(string str)
         {
             int length = 0;
